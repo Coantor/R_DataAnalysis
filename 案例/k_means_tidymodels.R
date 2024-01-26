@@ -1,6 +1,8 @@
 library(tidymodels)
 
-set.seed(27)
+set.seed(27) #产生样本点需要用到
+
+## 这里是设置参数
 
 centers <- tibble(
   cluster = factor(1:3), 
@@ -9,6 +11,17 @@ centers <- tibble(
   x2 = c(-1, 1, -2)              # x2 coordinate of cluster center
 )
 
+
+## 通过上面的参数算出样本
+temp <- centers %>%
+  mutate(
+    x1 = map2(num_points, x1, rnorm),
+    x2 = map2(num_points, x2, rnorm)
+  ) %>% 
+  select(-num_points)
+# rnorm(样本个数,样本均值)
+
+## 函数 unnest()目的是将temp的x轴,y轴数据展开
 labelled_points <- 
   centers %>%
   mutate(
@@ -25,11 +38,14 @@ points <-
   labelled_points %>% 
   select(-cluster)
 
+## kmeans是stats包里面的函数
 kclust <- kmeans(points, centers = 3)
-(kclust)
+(kclust) ## 原始的kmeans返回的列表读起来非常糟糕
 
-## 查看样本的分类
+## tidymodels包里面的函数
+## 对数据做预测 模型 + 原始数据
 (augment(kclust, points))
+## tidy是返回一个
 (tidy(kclust))
 (glance(kclust))
 
